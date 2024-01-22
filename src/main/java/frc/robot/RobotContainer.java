@@ -61,6 +61,11 @@ public class RobotContainer {
                 -MathUtil.applyDeadband(m_driverController.getZ(), OIConstants.kDriveDeadband),
                 true, true),
             m_robotDrive));
+
+        new JoystickButton(m_driverController, 8)
+        .whileTrue(new RunCommand(
+            () -> m_robotDrive.zeroHeading(),
+            m_robotDrive));    
   }
 
   /**
