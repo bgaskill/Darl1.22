@@ -27,7 +27,7 @@ public final class Constants {
   public static final class DriveConstants {
     // Driving Parameters - Note that these are not the maximum capable speeds of
     // the robot, rather the allowed maximum speeds
-    public static final double kMaxSpeedMetersPerSecond = 2.5; //max 4.8
+    public static final double kMaxSpeedMetersPerSecond = 1.5; //max 4.8
     public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
 
     public static final double kDirectionSlewRate = 2.4; // 1.2 radians per second
@@ -118,6 +118,7 @@ public final class Constants {
 
   public static final class OIConstants {
     public static final int kDriverControllerPort = 0;
+    public static final int kOperatorControllerPort = 1;
     public static final double kDriveDeadband = 0.05;
   }
 
@@ -139,4 +140,43 @@ public final class Constants {
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
   }
+
+public static final class AngleAdjustConstants {
+
+    public static final int kAngleAdjustID = 42;
+    public static final int kUpPosition = 0;
+    public static final double kDownPosition = -3000;
+
+}
+
+public static final class ClimberConstants {
+
+    public static final int kClimberID = 51;
+    
+
+}
+
+  public static final class ShooterConstants {
+
+    public static final int kShooterID = 31;
+    public static final int kShooter2ID = 32;
+    public static final int kAmpRPM = 100;
+    public static final int kSubwooferRPM = 10000;
+    public static final int kPodiumRPM = 15000;
+    public static final int kShooterSuck = -100;
+    }
+
+
+    public static final class IntakeConstants {
+
+      public static final int kIntakeID = 41;
+      public static final int kBottomIntakeID = 61;
+      public static final double intakeSpeed = .8;
+  
+  }
+
+
+
+
+
 }

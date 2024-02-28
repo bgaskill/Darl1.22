@@ -4,7 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -28,6 +31,8 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+    CameraServer.startAutomaticCapture();
+    
   }
 
   /**
@@ -88,8 +93,75 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+     
 
+  }
+/* 
+  public void updatePoseEstimatorWithVisionBotPose() {
+    PoseLatency visionBotPose = m_visionSystem.getPoseLatency();
+    // invalid LL data
+    if (visionBotPose.pose2d.getX() == 0.0) {
+      return;
+    }
+
+    // distance from current pose to vision estimated pose
+    double poseDifference = m_poseEstimator.getEstimatedPosition().getTranslation()
+        .getDistance(visionBotPose.pose2d.getTranslation());
+
+    if (m_visionSystem.areAnyTargetsValid()) {
+      double xyStds;
+      double degStds;
+      // multiple targets detected
+      if (m_visionSystem.getNumberOfTargetsVisible() >= 2) {
+        xyStds = 0.5;
+        degStds = 6;
+      }
+      // 1 target with large area and close to estimated pose
+      else if (m_visionSystem.getBestTargetArea() > 0.8 && poseDifference < 0.5) {
+        xyStds = 1.0;
+        degStds = 12;
+      }
+      // 1 target farther away and estimated pose is close
+      else if (m_visionSystem.getBestTargetArea() > 0.1 && poseDifference < 0.3) {
+        xyStds = 2.0;
+        degStds = 30;
+      }
+      // conditions don't match to add a vision measurement
+      else {
+        return;
+      }
+
+      m_poseEstimator.setVisionMeasurementStdDevs(
+          VecBuilder.fill(xyStds, xyStds, Units.degreesToRadians(degStds)));
+      m_poseEstimator.addVisionMeasurement(visionBotPose.pose2d,
+          Timer.getFPGATimestamp() - visionBotPose.latencySeconds);
+    }
+  }
+  
+  public void smartGyroReset() {
+    // Get rotation offset from Limelight
+  double gryoFixy = 0; //the 0 might be wrong, try 180 if it doesn't work right. More tweaking needs to be done because the gryo my physically be a lil off
+  if (botpose.length == 6) {
+              
+              double limelightRotationOffset = gryoFixy - botpose[5];
+  
+              // Print the yaw value
+              System.out.println("limelightRotationOffset: " + limelightRotationOffset);
+          } else {
+               double limelightRotationOffset = gryoFixy - limelightTable.getEntry("ts").getDouble(0.0); 
+          }        
+  
+  
+      
+      // Calculate offset angle between Limelight and robot front
+      offsetAngle = limelightRotationOffset;
+      
+      // Adjust gyro angle with offset angle
+      gyro.reset(); //cheeky lil reset just to make it all 0 to be safe
+      gyro.adjustAngle(offsetAngle); //SHOULD make the gryo say hey I'm at this angle
+}
+*/ 
   @Override
   public void testInit() {
     // Cancels all running commands at the start of test mode.
@@ -100,3 +172,7 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {}
 }
+
+
+
+//141

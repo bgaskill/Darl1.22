@@ -19,6 +19,13 @@ import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
+
+import frc.robot.subsystems.AngleAdjust;
+import frc.robot.subsystems.Climber;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
+
+
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -36,9 +43,14 @@ public class RobotContainer {
   // The robot's subsystems
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
 
+  private final AngleAdjust m_angleAdjust = new AngleAdjust();
+  private final Climber m_climber = new Climber();
+  private final Intake m_intake = new Intake();
+  private final Shooter m_shooter = new Shooter();
+
   // The driver's controller               replace joystick with xbox controller to use
   Joystick m_driverController = new Joystick (OIConstants.kDriverControllerPort);
-
+  Joystick m_operatorController = new Joystick (OIConstants.kOperatorControllerPort);
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -62,10 +74,10 @@ public class RobotContainer {
                 true, true),
             m_robotDrive));
 
-        new JoystickButton(m_driverController, 8)
-        .whileTrue(new RunCommand(
-            () -> m_robotDrive.zeroHeading(),
-            m_robotDrive));    
+//        new JoystickButton(m_driverController, 8)
+  //      .whileTrue(
+    //        smartGyroReset();
+      //  );    
   }
 
   /**
@@ -82,6 +94,47 @@ public class RobotContainer {
         .whileTrue(new RunCommand(
             () -> m_robotDrive.setX(),
             m_robotDrive));
+
+    new JoystickButton(m_operatorController, 2)
+            .whileTrue(new RunCommand(
+                    () -> m_angleAdjust.angleAdjustJoystickControl(m_operatorController.getRawAxis(1)), 
+                    m_angleAdjust));                    
+
+ new JoystickButton(m_operatorController, 4)
+            .whileTrue(new RunCommand(
+                    () -> m_climber.climberControl(m_operatorController.getRawAxis(1)), 
+                    m_angleAdjust));                    
+
+new JoystickButton(m_operatorController, 5)
+            .whileTrue(new RunCommand(
+                    () -> m_intake.intakeJoystickControl(m_operatorController.getRawAxis(5)), 
+                    m_intake));      
+                    
+new JoystickButton(m_driverController, 1)
+.onTrue(new RunCommand(
+    () -> m_intake.intakeRun(), 
+    m_intake)).onFalse(new RunCommand(
+        () -> m_intake.intakeStop(),
+        m_intake)); 
+        
+
+
+
+
+
+new JoystickButton(m_operatorController, 6)
+            .whileTrue(new RunCommand(
+                    () -> m_shooter.shooterControl(m_operatorController.getRawAxis(5)), 
+                    m_intake));   
+
+
+
+new RunCommand(
+() -> m_intake.intakeJoystickControl(m_operatorController.getRawAxis(5)), 
+                    m_intake);
+
+
+
   }
 
   /**
