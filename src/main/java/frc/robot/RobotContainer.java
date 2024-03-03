@@ -74,11 +74,19 @@ public class RobotContainer {
                 true, true),
             m_robotDrive));
 
-//        new JoystickButton(m_driverController, 8)
-  //      .whileTrue(
-    //        smartGyroReset();
-      //  );    
-  }
+
+    //rightstick for Arm
+    m_angleAdjust.setDefaultCommand(new RunCommand(() -> m_angleAdjust.angleAdjustJoystickControl(m_operatorController.getRawAxis(5)), m_angleAdjust));
+
+    //leftstick for <intake
+    m_intake.setDefaultCommand(new RunCommand(() -> m_intake.intakeJoystickControl(m_operatorController.getRawAxis(1)*.6), m_intake));
+ 
+    m_climber.setDefaultCommand(new RunCommand(() -> m_climber.climberControl(0), m_climber));
+
+    m_shooter.setDefaultCommand(new RunCommand(() -> m_shooter.shooterStop(), m_shooter));
+}
+
+
 
   /**
    * Use this method to define your button->command mappings. Buttons can be
@@ -89,49 +97,61 @@ public class RobotContainer {
    * passing it to a
    * {@link JoystickButton}.
    */
+
+   //Reset Gyro
   private void configureButtonBindings() {
+    new JoystickButton(m_driverController, 7)
+    .whileTrue(new RunCommand(
+        () -> m_robotDrive.zeroHeading(),
+        m_robotDrive));     
+    
+    //wheels in x position--brake--driver top middle button    
     new JoystickButton(m_driverController, Button.kR1.value)
         .whileTrue(new RunCommand(
             () -> m_robotDrive.setX(),
             m_robotDrive));
 
-    new JoystickButton(m_operatorController, 2)
+   //climber--back button and right trigger  forward only
+ new JoystickButton(m_operatorController, 7)
             .whileTrue(new RunCommand(
-                    () -> m_angleAdjust.angleAdjustJoystickControl(m_operatorController.getRawAxis(1)), 
-                    m_angleAdjust));                    
-
- new JoystickButton(m_operatorController, 4)
-            .whileTrue(new RunCommand(
-                    () -> m_climber.climberControl(m_operatorController.getRawAxis(1)), 
-                    m_angleAdjust));                    
-
-new JoystickButton(m_operatorController, 5)
-            .whileTrue(new RunCommand(
-                    () -> m_intake.intakeJoystickControl(m_operatorController.getRawAxis(5)), 
-                    m_intake));      
-                    
+                    () -> m_climber.climberControl(m_operatorController.getRawAxis(3)*-1), 
+                    m_climber));                    
+      
+  //Fire--Driver trigger                  
 new JoystickButton(m_driverController, 1)
-.onTrue(new RunCommand(
+.whileTrue(new RunCommand(
     () -> m_intake.intakeRun(), 
-    m_intake)).onFalse(new RunCommand(
-        () -> m_intake.intakeStop(),
-        m_intake)); 
+    m_intake)); 
         
-
-
-
-
-
-new JoystickButton(m_operatorController, 6)
+//Speaker shot  y button
+new JoystickButton(m_operatorController, 4)
             .whileTrue(new RunCommand(
-                    () -> m_shooter.shooterControl(m_operatorController.getRawAxis(5)), 
-                    m_intake));   
+                    () -> m_shooter.shooterSpeaker(), 
+                    m_shooter));   
 
+                    //manual shooter speed start and left trigger
+new JoystickButton(m_operatorController, 8)
+            .whileTrue(new RunCommand(
+                    () -> m_shooter.shooterControl(m_operatorController.getRawAxis(2)*-1), 
+                    m_shooter));   
 
+                    //amp shot
+new JoystickButton(m_operatorController, 1)
+            .whileTrue(new RunCommand(
+                    () -> m_shooter.shooterAmp(), 
+                    m_shooter));   
 
-new RunCommand(
-() -> m_intake.intakeJoystickControl(m_operatorController.getRawAxis(5)), 
-                    m_intake);
+                   //trap shot
+new JoystickButton(m_operatorController, 2)
+            .whileTrue(new RunCommand(
+                    () -> m_shooter.shooterTrap(), 
+                    m_shooter));   
+
+                    //shooter intake
+new JoystickButton(m_operatorController, 3)
+            .whileTrue(new RunCommand(
+                    () -> m_shooter.shooterSuck(), 
+                    m_shooter));   
 
 
 
@@ -155,9 +175,9 @@ new RunCommand(
         // Start at the origin facing the +X direction
         new Pose2d(0, 0, new Rotation2d(0)),
         // Pass through these two interior waypoints, making an 's' curve path
-        List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
+        List.of(new Translation2d(1.2, 0), new Translation2d(0, 0)),
         // End 3 meters straight ahead of where we started, facing forward
-        new Pose2d(3, 0, new Rotation2d(0)),
+        new Pose2d(1.2, 1, new Rotation2d(0)),
         config);
 
     var thetaController = new ProfiledPIDController(

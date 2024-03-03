@@ -41,15 +41,58 @@ private final TalonFX talonShooter2 = new TalonFX (ShooterConstants.kShooter2ID)
 
   public void shooterControl(double speed){
 
-    talonShooter.set(speed*.7);
-    talonShooter2.set(speed*.7);
-    
-    //System.out.println("RPM",talonShooter.getVelocity());
+    talonShooter.set(speed*.6);
+    talonShooter2.set(speed*.6);
+    var rotorRPM = talonShooter.getVelocity();
+    var rotorRPMLatency =rotorRPM.getTimestamp().getLatency();
+    rotorRPM.waitForUpdate(.020);
+    SmartDashboard.putNumber("RPM",rotorRPM.getValue());
   }
+public void shooterAmp(){
+
+    talonShooter.set(-.24);
+    talonShooter2.set(-.05);
+    var rotorRPM = talonShooter.getVelocity();
+    var rotorRPMLatency =rotorRPM.getTimestamp().getLatency();
+    rotorRPM.waitForUpdate(.020);
+    SmartDashboard.putNumber("RPM",rotorRPM.getValue());
+    
+  }
+
+public void shooterSpeaker(){
+
+    talonShooter.set(-.6);
+    talonShooter2.set(-.6);
+    var rotorRPM = talonShooter.getVelocity();
+    var rotorRPMLatency =rotorRPM.getTimestamp().getLatency();
+    rotorRPM.waitForUpdate(.020);
+    SmartDashboard.putNumber("RPM",rotorRPM.getValue());
+    
+  }
+
+public void shooterStop(){
+
+    talonShooter.set(.0);
+    talonShooter2.set(0);
+   
+   
+    
+  }
+public void shooterSuck(){
+
+    talonShooter.set(.3);
+    talonShooter2.set(.30);
+
+
+}
+public void shooterTrap(){
+
+    talonShooter.set(-.5);
+    talonShooter2.set(-.50);
 
 
 }
 
-
+}
 
 //47

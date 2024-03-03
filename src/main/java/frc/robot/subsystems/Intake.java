@@ -13,6 +13,10 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import com.revrobotics.ColorSensorV3;
 
 
 
@@ -21,7 +25,8 @@ public class Intake extends SubsystemBase {
 private final CANSparkMax intakeBottom = new CANSparkMax(IntakeConstants.kBottomIntakeID,MotorType.kBrushless );
 private final TalonFX talonIntake = new TalonFX (IntakeConstants.kIntakeID);
 
-
+private final I2C.Port i2cPort = I2C.Port.kOnboard;
+private final ColorSensorV3 m_colorSensorV3 = new ColorSensorV3(i2cPort);
 
   /** Creates a new Intake. */
   public Intake() {}
@@ -33,15 +38,20 @@ private final TalonFX talonIntake = new TalonFX (IntakeConstants.kIntakeID);
 
   public void intakeJoystickControl(double speed){
     
-    talonIntake.set(speed*-1);
-    intakeBottom.set(speed*-1);
+    SmartDashboard.putNumber("proximity sensor", m_colorSensorV3.getProximity());
+
+    talonIntake.set(((speed/m_colorSensorV3.getProximity())*-100));
+    intakeBottom.set(((speed/m_colorSensorV3.getProximity())*-100));
   }
 
   public void intakeRun(){
     talonIntake.set(IntakeConstants.intakeSpeed);
   }
 
-  
+  public void intakeInterupt(){
+    
+    talonIntake.set(0);
+  }
 
   
   public void intakeStop(){
