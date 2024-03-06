@@ -2,6 +2,8 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
+//check speed change buttons  drive subsystem
+
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
@@ -15,6 +17,8 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
@@ -28,6 +32,7 @@ import frc.robot.subsystems.Shooter;
 
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -51,10 +56,31 @@ public class RobotContainer {
   // The driver's controller               replace joystick with xbox controller to use
   Joystick m_driverController = new Joystick (OIConstants.kDriverControllerPort);
   Joystick m_operatorController = new Joystick (OIConstants.kOperatorControllerPort);
+
+//Chooser Set up
+  SendableChooser<Command> chooser = new SendableChooser<>();
+
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    
+      // chooser stuff
+    chooser.addOption("Exit Only", getAutonomousCommand());
+    chooser.addOption("Shoot 2 Middle", getAutonomousCommand2());
+    chooser.addOption("Straight to Centerline 45", getAutonomousCommand3());
+    chooser.addOption("Blue Shoot Amp slide", getAutonomousCommand4());
+    chooser.addOption("Red Shoot and Slide", getAutonomousCommand5());
+    chooser.addOption("Blue Shoot and Slide", getAutonomousCommand6());
+    chooser.addOption("Red HomeWrekker", getAutonomousCommand7());
+    chooser.addOption("Blue HomeWrekker", getAutonomousCommand8());
+    //chooser.addOption("Red Four", getAutonomousCommand9());
+    //chooser.addOption("Blue Four", getAutonomousCommand10());
+    
+    SmartDashboard.putData(chooser);
+    
+    
     // Configure the button bindings
     configureButtonBindings();
 
@@ -100,6 +126,19 @@ public class RobotContainer {
 
    //Reset Gyro
   private void configureButtonBindings() {
+    
+    //changes max speed to low
+    new JoystickButton(m_driverController, 3)
+            .whileTrue(new RunCommand(
+                () -> m_robotDrive.changeSpeedLow(),
+                m_robotDrive));
+    
+    //changes max speed to high
+    new JoystickButton(m_driverController, 4)
+            .whileTrue(new RunCommand(
+                () -> m_robotDrive.changeSpeedHigh(),
+                m_robotDrive));
+
     new JoystickButton(m_driverController, 7)
     .whileTrue(new RunCommand(
         () -> m_robotDrive.zeroHeading(),
@@ -162,32 +201,89 @@ new JoystickButton(m_operatorController, 3)
    *
    * @return the command to run in autonomous
    */
+
+
+//                  Auto1: Exit Only
+
+
+//Exit Only
   public Command getAutonomousCommand() {
-    // Create config for trajectory
-    TrajectoryConfig config = new TrajectoryConfig(
-        AutoConstants.kMaxSpeedMetersPerSecond,
-        AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-        // Add kinematics to ensure max speed is actually obeyed
-        .setKinematics(DriveConstants.kDriveKinematics);
+ // Create config for trajectory
+ TrajectoryConfig config = new TrajectoryConfig(
+    AutoConstants.kMaxSpeedMetersPerSecond,
+    AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+    // Add kinematics to ensure max speed is actually obeyed
+    .setKinematics(DriveConstants.kDriveKinematics);
+   
+// An example trajectory to follow. All units in meters.
+Trajectory straight = TrajectoryGenerator.generateTrajectory(
+    // Start at the origin facing the +X direction
+    new Pose2d(0, 0, new Rotation2d(0)),
+    // Pass through these two interior waypoints, making an 's' curve path
+    List.of(new Translation2d(1, 0), new Translation2d(2, 0)),
+    // End 3 meters straight ahead of where we started, facing forward
+    new Pose2d(2.2, 0, new Rotation2d(0)),
+    config);
 
-    // An example trajectory to follow. All units in meters.
-    Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
-        // Start at the origin facing the +X direction
-        new Pose2d(0, 0, new Rotation2d(0)),
-        // Pass through these two interior waypoints, making an 's' curve path
-        List.of(new Translation2d(1.2, 0), new Translation2d(0, 0)),
-        // End 3 meters straight ahead of where we started, facing forward
-        new Pose2d(1.2, 1, new Rotation2d(0)),
-        config);
 
-    var thetaController = new ProfiledPIDController(
-        AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+var thetaController = new ProfiledPIDController(
+    AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-    SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
-        exampleTrajectory,
+
+    SwerveControllerCommand swerveControllerCommand2 = new SwerveControllerCommand(
+        straight,
         m_robotDrive::getPose, // Functional interface to feed supplier
         DriveConstants.kDriveKinematics,
+        
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
+
+// Reset odometry to the starting pose of the trajectory.
+m_robotDrive.resetOdometry(straight.getInitialPose());
+
+// Run path following command, then stop at the end.
+return swerveControllerCommand2
+    .andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
+}
+
+
+//                                            Auto 2: Shoot 2 Middle
+
+//shoot high and then engage
+public Command getAutonomousCommand2() {
+// Create config for trajectory
+TrajectoryConfig config = new TrajectoryConfig(
+     AutoConstants.kMaxSpeedMetersPerSecond,
+    AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+    // Add kinematics to ensure max speed is actually obeyed
+    .setKinematics(DriveConstants.kDriveKinematics);
+   
+// An example trajectory to follow. All units in meters.
+Trajectory straigth2Note = TrajectoryGenerator.generateTrajectory(
+    // Start at the origin facing the +X direction
+    new Pose2d(0, 0, new Rotation2d(0)),
+    // Pass through these two interior waypoints, making an 's' curve path
+    List.of(new Translation2d(.5, 0), new Translation2d(1, 0)),
+    // End 3 meters straight ahead of where we started, facing forward
+    new Pose2d(1.5, 0, new Rotation2d(0)),
+    config);
+
+
+var thetaController = new ProfiledPIDController(
+    AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+
+    SwerveControllerCommand swerveControllerCommand2 = new SwerveControllerCommand(
+        straigth2Note,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
+        
 
         // Position controllers
         new PIDController(AutoConstants.kPXController, 0, 0),
@@ -196,10 +292,395 @@ new JoystickButton(m_operatorController, 3)
         m_robotDrive::setModuleStates,
         m_robotDrive);
 
-    // Reset odometry to the starting pose of the trajectory.
-    m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
+Command highSpeaker = new RunCommand(
+() -> m_shooter.shooterTrap(), 
+m_shooter).withTimeout(1.1);
 
-    // Run path following command, then stop at the end.
-    return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
-  }
+Command shooterStop = new RunCommand(
+() -> m_shooter.shooterStop(), 
+m_shooter).withTimeout(1.1);
+
+Command launch = new RunCommand(
+() -> m_intake.intakeRun(), 
+m_intake).withTimeout(1.1);
+
+Command suck = new RunCommand(
+() -> m_intake.intakeRun(), 
+m_intake).withTimeout(3);
+
+Command stopSuck = new RunCommand(
+() -> m_intake.intakeStop(), 
+m_intake);
+    
+Command lowerArm = new RunCommand(
+() -> m_angleAdjust.angleAdjustAuto(-.4), 
+m_angleAdjust).withTimeout(1.3);
+
+
+Command armStop = new RunCommand(
+() -> m_angleAdjust.angleAdjustAuto(0), 
+m_angleAdjust).withTimeout(1.1);
+
+//ParallelCommandGroup
+
+// Reset odometry to the starting pose of the trajectory.
+m_robotDrive.resetOdometry(straigth2Note.getInitialPose());
+
+return highSpeaker
+.andThen(launch)
+.andThen(lowerArm)
+.andThen(armStop)
+.andThen(suck)
+.andThen(swerveControllerCommand2)
+
+.andThen(() -> m_robotDrive.drive(0, 0, 0, false, false))
+//.andThen(launch)
+;
 }
+//andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));;
+// Run path following command, then stop at the end.
+//return highSpeaker.
+//andThen(launch).andThen(lowerArm).andThen(armStop).andThen(suck).
+//andThen(swerveControllerCommand2).
+//andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
+
+
+
+//                              Auto 3:
+
+
+public Command getAutonomousCommand3() {
+// Create config for trajectory
+TrajectoryConfig config = new TrajectoryConfig(
+     3,
+    AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+    // Add kinematics to ensure max speed is actually obeyed
+    .setKinematics(DriveConstants.kDriveKinematics);
+   
+// An example trajectory to follow. All units in meters.
+Trajectory straigthGamePiece2 = TrajectoryGenerator.generateTrajectory(
+    // Start at the origin facing the +X direction
+    new Pose2d(0, 0, new Rotation2d(0)),
+    // Pass through these two interior waypoints, making an 's' curve path
+    List.of(new Translation2d(2, 0), new Translation2d(5, 0)),
+    // End 3 meters straight ahead of where we started, facing forward
+    new Pose2d(5.8, 0, new Rotation2d(45)),
+    config);
+
+
+var thetaController = new ProfiledPIDController(
+    AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+
+    SwerveControllerCommand swerveControllerCommand3 = new SwerveControllerCommand(
+        straigthGamePiece2,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
+        
+
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
+
+
+
+    
+// Reset odometry to the starting pose of the trajectory.
+m_robotDrive.resetOdometry(straigthGamePiece2.getInitialPose());
+
+
+ 
+
+     
+// Run path following command, then stop at the end.
+return swerveControllerCommand3
+    //.andThen(m_robotDrive.run(() -> m_robotDrive.drive(0.2, 0, 0, false, false))).withTimeout(5.0)
+    .andThen(m_robotDrive.run(() -> m_robotDrive.drive(0, 0, 0, false, false)));
+}
+
+   
+//                              Auto 4:
+
+
+//blue middle slide inside
+public Command getAutonomousCommand4() {
+// Create config for trajectory
+TrajectoryConfig config = new TrajectoryConfig(
+     AutoConstants.kMaxSpeedMetersPerSecond,
+    AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+    // Add kinematics to ensure max speed is actually obeyed
+    .setKinematics(DriveConstants.kDriveKinematics);
+   
+// An example trajectory to follow. All units in meters.
+Trajectory straigthGamePiece2 = TrajectoryGenerator.generateTrajectory(
+    // Start at the origin facing the +X direction
+    new Pose2d(0, 0, new Rotation2d(0)),
+    // Pass through these two interior waypoints, making an 's' curve path
+    List.of(new Translation2d(1, -.5), new Translation2d(3, -.5)),
+    // End 3 meters straight ahead of where we started, facing forward
+    new Pose2d(4.75, -.31, new Rotation2d(0)),
+    config);
+
+
+var thetaController = new ProfiledPIDController(
+    AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+
+    SwerveControllerCommand swerveControllerCommand3 = new SwerveControllerCommand(
+        straigthGamePiece2,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
+        
+
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
+
+
+
+    
+// Reset odometry to the starting pose of the trajectory.
+m_robotDrive.resetOdometry(straigthGamePiece2.getInitialPose());
+
+
+ 
+
+     
+// Run path following command, then stop at the end.
+return swerveControllerCommand3
+    //.andThen(m_robotDrive.run(() -> m_robotDrive.drive(0.2, 0, 0, false, false))).withTimeout(5.0)
+    .andThen(m_robotDrive.run(() -> m_robotDrive.drive(0, 0, 0, false, false)));
+
+}
+
+
+//                      Auto 5:
+
+
+public Command getAutonomousCommand5() {
+// Create config for trajectory
+TrajectoryConfig config = new TrajectoryConfig(
+     AutoConstants.kMaxSpeedMetersPerSecond,
+    AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+    // Add kinematics to ensure max speed is actually obeyed
+    .setKinematics(DriveConstants.kDriveKinematics);
+   
+// An example trajectory to follow. All units in meters.
+Trajectory BlueSlide = TrajectoryGenerator.generateTrajectory(
+    // Start at the origin facing the +X direction
+    new Pose2d(0, 0, new Rotation2d(0)),
+    // Pass through these two interior waypoints, making an 's' curve path
+    List.of(new Translation2d(.8, 1.8), new Translation2d(2.75, 1.8)),
+    // End 3 meters straight ahead of where we started, facing forward
+    new Pose2d(4.75, 4, new Rotation2d(0)),
+    config);
+
+
+var thetaController = new ProfiledPIDController(
+    AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+
+    SwerveControllerCommand swerveControllerCommand5 = new SwerveControllerCommand(
+        BlueSlide,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
+        
+
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
+
+
+    
+// Reset odometry to the starting pose of the trajectory.
+m_robotDrive.resetOdometry(BlueSlide.getInitialPose());
+
+
+ 
+
+     
+// Run path following command, then stop at the end.
+return swerveControllerCommand5.andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
+}
+
+
+//                      Auto 6:
+
+
+public Command getAutonomousCommand6() {
+// Create config for trajectory
+TrajectoryConfig config = new TrajectoryConfig(
+     AutoConstants.kMaxSpeedMetersPerSecond,
+    AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+    // Add kinematics to ensure max speed is actually obeyed
+    .setKinematics(DriveConstants.kDriveKinematics);
+   
+// An example trajectory to follow. All units in meters.
+Trajectory RedSlide = TrajectoryGenerator.generateTrajectory(
+    // Start at the origin facing the +X direction
+    new Pose2d(0, 0, new Rotation2d(0)),
+    // Pass through these two interior waypoints, making an 's' curve path
+    List.of(new Translation2d(.8, -1.8), new Translation2d(2.75, -1.8)),
+    // End 3 meters straight ahead of where we started, facing forward
+    new Pose2d(4.75, -4, new Rotation2d(0)),
+    config);
+
+
+var thetaController = new ProfiledPIDController(
+    AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+
+    SwerveControllerCommand swerveControllerCommand5 = new SwerveControllerCommand(
+        RedSlide,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
+        
+
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
+
+
+
+// Reset odometry to the starting pose of the trajectory.
+m_robotDrive.resetOdometry(RedSlide.getInitialPose());
+
+
+ 
+
+     
+// Run path following command, then stop at the end.
+return swerveControllerCommand5.andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
+}
+
+
+//                      Auto 7:
+
+public Command getAutonomousCommand7() {
+// Create config for trajectory
+TrajectoryConfig config = new TrajectoryConfig(
+    1,
+    AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+    // Add kinematics to ensure max speed is actually obeyed
+    .setKinematics(DriveConstants.kDriveKinematics);
+   
+// An example trajectory to follow. All units in meters.
+Trajectory straigthGamePiece = TrajectoryGenerator.generateTrajectory(
+    // Start at the origin facing the +X direction
+    new Pose2d(0, 0, new Rotation2d(0)),
+    // Pass through these two interior waypoints, making an 's' curve path
+    List.of(new Translation2d(1, -.4), new Translation2d(3, -.4)),
+    // End 3 meters straight ahead of where we started, facing forward
+    new Pose2d(4.75, -.1, new Rotation2d(0)),
+    config);
+
+
+var thetaController = new ProfiledPIDController(
+    AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+
+    SwerveControllerCommand swerveControllerCommand2 = new SwerveControllerCommand(
+        straigthGamePiece,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
+        
+
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
+
+
+    
+// Reset odometry to the starting pose of the trajectory.
+m_robotDrive.resetOdometry(straigthGamePiece.getInitialPose());
+
+
+ 
+
+     
+// Run path following command, then stop at the end.
+return swerveControllerCommand2
+    //.andThen(m_robotDrive.run(() -> m_robotDrive.drive(0.2, 0, 0, false, false))).withTimeout(5.0)
+    .andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
+}
+
+
+
+//                              Auto 8:
+
+
+//red Outside
+public Command getAutonomousCommand8() {
+// Create config for trajectory
+TrajectoryConfig config = new TrajectoryConfig(
+    1,
+    AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+    // Add kinematics to ensure max speed is actually obeyed
+    .setKinematics(DriveConstants.kDriveKinematics);
+   
+// An example trajectory to follow. All units in meters.
+Trajectory straigthGamePiece2 = TrajectoryGenerator.generateTrajectory(
+    // Start at the origin facing the +X direction
+    new Pose2d(0, 0, new Rotation2d(0)),
+    // Pass through these two interior waypoints, making an 's' curve path
+    List.of(new Translation2d(1, .3), new Translation2d(3.3, .3)),
+    // End 3 meters straight ahead of where we started, facing forward
+    new Pose2d(4.75, 0, new Rotation2d(0)),
+    config);
+
+
+var thetaController = new ProfiledPIDController(
+    AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+
+    SwerveControllerCommand swerveControllerCommand3 = new SwerveControllerCommand(
+        straigthGamePiece2,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
+        
+
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
+
+
+
+    
+// Reset odometry to the starting pose of the trajectory.
+m_robotDrive.resetOdometry(straigthGamePiece2.getInitialPose());
+
+
+ 
+
+     
+// Run path following command, then stop at the end.
+return swerveControllerCommand3
+    //.andThen(m_robotDrive.run(() -> m_robotDrive.drive(0.2, 0, 0, false, false))).withTimeout(5.0)
+    .andThen(m_robotDrive.run(() -> m_robotDrive.drive(0, 0, 0, false, false)));
+}
+  }
+

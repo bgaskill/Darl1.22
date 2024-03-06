@@ -46,6 +46,7 @@ private final ColorSensorV3 m_colorSensorV3 = new ColorSensorV3(i2cPort);
 
   public void intakeRun(){
     talonIntake.set(IntakeConstants.intakeSpeed);
+     intakeBottom.set(IntakeConstants.intakeSpeed);
   }
 
   public void intakeInterupt(){

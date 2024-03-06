@@ -50,7 +50,7 @@ private final TalonFX talonShooter2 = new TalonFX (ShooterConstants.kShooter2ID)
   }
 public void shooterAmp(){
 
-    talonShooter.set(-.24);
+    talonShooter.set(-.22);
     talonShooter2.set(-.05);
     var rotorRPM = talonShooter.getVelocity();
     var rotorRPMLatency =rotorRPM.getTimestamp().getLatency();

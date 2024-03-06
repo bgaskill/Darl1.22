@@ -100,9 +100,9 @@ public void angleAdjustStop(double speed)
   angler.set(0);
   }  
 
-  public void angleAdjustPresets()
+  public void angleAdjustAuto(double speed)
   {  
-  
+   angler.set(speed*-1);
   }
 
 
