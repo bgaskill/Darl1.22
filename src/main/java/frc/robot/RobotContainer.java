@@ -68,11 +68,11 @@ public class RobotContainer {
     
       // chooser stuff
     chooser.addOption("Exit Only", getAutonomousCommand());
-    chooser.addOption("Shoot 2 Middle", getAutonomousCommand2());
-    chooser.addOption("Straight to Centerline 45", getAutonomousCommand3());
-    chooser.addOption("Blue Shoot Amp slide", getAutonomousCommand4());
-    chooser.addOption("Red Shoot and Slide", getAutonomousCommand5());
-    chooser.addOption("Blue Shoot and Slide", getAutonomousCommand6());
+    chooser.addOption("Shoot and exit", getAutonomousCommand2());
+    chooser.addOption("Straight to Centerline 45 3m/s", getAutonomousCommand3());
+    chooser.addOption("Shoot 2", getAutonomousCommand4());
+    chooser.addOption("4 shot no aim", getAutonomousCommand5());
+    chooser.addOption("4 shot dev", getAutonomousCommand6());
     chooser.addOption("Red HomeWrekker", getAutonomousCommand7());
     chooser.addOption("Blue HomeWrekker", getAutonomousCommand8());
     //chooser.addOption("Red Four", getAutonomousCommand9());
@@ -252,9 +252,9 @@ return swerveControllerCommand2
 }
 
 
-//                                            Auto 2: Shoot 2 Middle
+//                                            Auto 2: Shoot and exit
 
-//shoot high and then engage
+
 public Command getAutonomousCommand2() {
 // Create config for trajectory
 TrajectoryConfig config = new TrajectoryConfig(
@@ -328,11 +328,7 @@ m_robotDrive.resetOdometry(straigth2Note.getInitialPose());
 
 return highSpeaker
 .andThen(launch)
-.andThen(lowerArm)
-.andThen(armStop)
-.andThen(suck)
 .andThen(swerveControllerCommand2)
-
 .andThen(() -> m_robotDrive.drive(0, 0, 0, false, false))
 //.andThen(launch)
 ;
@@ -346,7 +342,7 @@ return highSpeaker
 
 
 
-//                              Auto 3:
+//                              Auto 3:to centerline 3 m/s and 45 to right
 
 
 public Command getAutonomousCommand3() {
@@ -403,10 +399,9 @@ return swerveControllerCommand3
 }
 
    
-//                              Auto 4:
+//                              Auto 4: Shoot 2
 
 
-//blue middle slide inside
 public Command getAutonomousCommand4() {
 // Create config for trajectory
 TrajectoryConfig config = new TrajectoryConfig(
@@ -416,13 +411,13 @@ TrajectoryConfig config = new TrajectoryConfig(
     .setKinematics(DriveConstants.kDriveKinematics);
    
 // An example trajectory to follow. All units in meters.
-Trajectory straigthGamePiece2 = TrajectoryGenerator.generateTrajectory(
+Trajectory straigth2Note = TrajectoryGenerator.generateTrajectory(
     // Start at the origin facing the +X direction
     new Pose2d(0, 0, new Rotation2d(0)),
     // Pass through these two interior waypoints, making an 's' curve path
-    List.of(new Translation2d(1, -.5), new Translation2d(3, -.5)),
+    List.of(new Translation2d(.5, 0), new Translation2d(1, 0)),
     // End 3 meters straight ahead of where we started, facing forward
-    new Pose2d(4.75, -.31, new Rotation2d(0)),
+    new Pose2d(1.5, 0, new Rotation2d(0)),
     config);
 
 
@@ -431,8 +426,8 @@ var thetaController = new ProfiledPIDController(
 thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
 
-    SwerveControllerCommand swerveControllerCommand3 = new SwerveControllerCommand(
-        straigthGamePiece2,
+    SwerveControllerCommand swerveControllerCommand4 = new SwerveControllerCommand(
+        straigth2Note,
         m_robotDrive::getPose, // Functional interface to feed supplier
         DriveConstants.kDriveKinematics,
         
@@ -444,43 +439,82 @@ thetaController.enableContinuousInput(-Math.PI, Math.PI);
         m_robotDrive::setModuleStates,
         m_robotDrive);
 
+Command highSpeaker = new RunCommand(
+() -> m_shooter.shooterTrap(), 
+m_shooter).withTimeout(1.1);
 
+Command shooterStop = new RunCommand(
+() -> m_shooter.shooterStop(), 
+m_shooter).withTimeout(1.1);
 
+Command launch = new RunCommand(
+() -> m_intake.intakeRun(), 
+m_intake).withTimeout(1.1);
+
+Command suck = new RunCommand(
+() -> m_intake.intakeRun(), 
+m_intake).withTimeout(3);
+
+Command stopSuck = new RunCommand(
+() -> m_intake.intakeStop(), 
+m_intake).withTimeout(1);
     
+Command lowerArm = new RunCommand(
+() -> m_angleAdjust.angleAdjustAuto(-.4), 
+m_angleAdjust).withTimeout(1.3);
+
+
+Command armStop = new RunCommand(
+() -> m_angleAdjust.angleAdjustAuto(0), 
+m_angleAdjust).withTimeout(1.1);
+
+//ParallelCommandGroup
+
 // Reset odometry to the starting pose of the trajectory.
-m_robotDrive.resetOdometry(straigthGamePiece2.getInitialPose());
+m_robotDrive.resetOdometry(straigth2Note.getInitialPose());
 
-
- 
-
-     
-// Run path following command, then stop at the end.
-return swerveControllerCommand3
-    //.andThen(m_robotDrive.run(() -> m_robotDrive.drive(0.2, 0, 0, false, false))).withTimeout(5.0)
-    .andThen(m_robotDrive.run(() -> m_robotDrive.drive(0, 0, 0, false, false)));
-
+return highSpeaker
+.andThen(launch)
+.andThen(lowerArm)
+.andThen(armStop)
+.andThen(swerveControllerCommand4)
+.andThen(() -> m_robotDrive.drive(0, 0, 0, false, false))
+//.andThen(launch)
+;
 }
+//andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));;
+// Run path following command, then stop at the end.
+//return highSpeaker.
+//andThen(launch).andThen(lowerArm).andThen(armStop).andThen(suck).
+//andThen(swerveControllerCommand2).
+//andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
 
 
-//                      Auto 5:
+
+
+//                      Auto 5: 4 note no airm
 
 
 public Command getAutonomousCommand5() {
 // Create config for trajectory
 TrajectoryConfig config = new TrajectoryConfig(
-     AutoConstants.kMaxSpeedMetersPerSecond,
+     1.5,
     AutoConstants.kMaxAccelerationMetersPerSecondSquared)
     // Add kinematics to ensure max speed is actually obeyed
     .setKinematics(DriveConstants.kDriveKinematics);
    
 // An example trajectory to follow. All units in meters.
-Trajectory BlueSlide = TrajectoryGenerator.generateTrajectory(
+Trajectory straigth2Note = TrajectoryGenerator.generateTrajectory(
     // Start at the origin facing the +X direction
     new Pose2d(0, 0, new Rotation2d(0)),
     // Pass through these two interior waypoints, making an 's' curve path
-    List.of(new Translation2d(.8, 1.8), new Translation2d(2.75, 1.8)),
+    List.of(new Translation2d(.5, 1.2), new Translation2d(1.5, 1.2)
+, new Translation2d(.5, 0),  new Translation2d(1.5, 0)
+, new Translation2d(.5, -1.20),  new Translation2d(1.5, -1.2)
+    //new Translation2d(1, 2),new Translation2d(1.5, 2)
+),
     // End 3 meters straight ahead of where we started, facing forward
-    new Pose2d(4.75, 4, new Rotation2d(0)),
+    new Pose2d(5.8, -1.2, new Rotation2d(0)),
     config);
 
 
@@ -489,8 +523,8 @@ var thetaController = new ProfiledPIDController(
 thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
 
-    SwerveControllerCommand swerveControllerCommand5 = new SwerveControllerCommand(
-        BlueSlide,
+    SwerveControllerCommand swerveControllerCommand4 = new SwerveControllerCommand(
+        straigth2Note,
         m_robotDrive::getPose, // Functional interface to feed supplier
         DriveConstants.kDriveKinematics,
         
@@ -502,49 +536,137 @@ thetaController.enableContinuousInput(-Math.PI, Math.PI);
         m_robotDrive::setModuleStates,
         m_robotDrive);
 
+Command highSpeaker = new RunCommand(
+() -> m_shooter.shooterTrap(), 
+m_shooter).withTimeout(.5);
 
+Command shooterStop = new RunCommand(
+() -> m_shooter.shooterStop(), 
+m_shooter).withTimeout(1.1);
+
+Command launch = new RunCommand(
+() -> m_intake.intakeRun(), 
+m_intake).withTimeout(.5);
+
+Command suck = new RunCommand(
+() -> m_intake.intakeRun(), 
+m_intake).withTimeout(3);
+
+Command stopSuck = new RunCommand(
+() -> m_intake.intakeStop(), 
+m_intake).withTimeout(1);
     
+Command lowerArm = new RunCommand(
+() -> m_angleAdjust.angleAdjustAuto(-.4), 
+m_angleAdjust).withTimeout(1.3);
+
+
+Command armStop = new RunCommand(
+() -> m_angleAdjust.angleAdjustAuto(0), 
+m_angleAdjust).withTimeout(1.1);
+
+//ParallelCommandGroup
+
 // Reset odometry to the starting pose of the trajectory.
-m_robotDrive.resetOdometry(BlueSlide.getInitialPose());
+m_robotDrive.resetOdometry(straigth2Note.getInitialPose());
 
-
- 
-
-     
-// Run path following command, then stop at the end.
-return swerveControllerCommand5.andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
+return highSpeaker
+.andThen(launch)
+.andThen(lowerArm)
+.andThen(armStop)
+.andThen(swerveControllerCommand4)
+.andThen(() -> m_robotDrive.drive(0, 0, 0, false, false))
+//.andThen(launch)
+;
 }
+//andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));;
+// Run path following command, then stop at the end.
+//return highSpeaker.
+//andThen(launch).andThen(lowerArm).andThen(armStop).andThen(suck).
+//andThen(swerveControllerCommand2).
+//andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
 
 
-//                      Auto 6:
+//                      Auto 6:4 shot dev
 
 
 public Command getAutonomousCommand6() {
 // Create config for trajectory
 TrajectoryConfig config = new TrajectoryConfig(
-     AutoConstants.kMaxSpeedMetersPerSecond,
+     1.5,
     AutoConstants.kMaxAccelerationMetersPerSecondSquared)
     // Add kinematics to ensure max speed is actually obeyed
     .setKinematics(DriveConstants.kDriveKinematics);
    
 // An example trajectory to follow. All units in meters.
-Trajectory RedSlide = TrajectoryGenerator.generateTrajectory(
+Trajectory straigth2Note = TrajectoryGenerator.generateTrajectory(
     // Start at the origin facing the +X direction
     new Pose2d(0, 0, new Rotation2d(0)),
     // Pass through these two interior waypoints, making an 's' curve path
-    List.of(new Translation2d(.8, -1.8), new Translation2d(2.75, -1.8)),
+    List.of(new Translation2d(.5, 1.0), new Translation2d(1.3, 1.1)
+ 
+    //new Translation2d(1, 2),new Translation2d(1.5, 2)
+),
     // End 3 meters straight ahead of where we started, facing forward
-    new Pose2d(4.75, -4, new Rotation2d(0)),
+    new Pose2d(.5, 0, new Rotation2d(.6)),
     config);
 
+Trajectory middleNote = TrajectoryGenerator.generateTrajectory(
+    // Start at the origin facing the +X direction
+    new Pose2d(0, 0, new Rotation2d(0)),
+    // Pass through these two interior waypoints, making an 's' curve path
+    List.of(new Translation2d(.5, 0), new Translation2d(1.3, 0)
+ 
+    //new Translation2d(1, 2),new Translation2d(1.5, 2)
+),
+    // End 3 meters straight ahead of where we started, facing forward
+    new Pose2d(1.6, 0, new Rotation2d(-.1)),
+    config);
 
+Trajectory sideNote = TrajectoryGenerator.generateTrajectory(
+    // Start at the origin facing the +X direction
+    new Pose2d(0, 0, new Rotation2d(0)),
+    // Pass through these two interior waypoints, making an 's' curve path
+    List.of(new Translation2d(.2, -.5), new Translation2d(1.1, -1.2)
+ 
+    //new Translation2d(1, 2),new Translation2d(1.5, 2)
+),
+    // End 3 meters straight ahead of where we started, facing forward
+    new Pose2d(1.7, -1.4, new Rotation2d(-.4)),
+    config);
 var thetaController = new ProfiledPIDController(
     AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
 thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
 
-    SwerveControllerCommand swerveControllerCommand5 = new SwerveControllerCommand(
-        RedSlide,
+    SwerveControllerCommand swerveControllerCommand4 = new SwerveControllerCommand(
+        straigth2Note,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
+        
+
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
+
+        SwerveControllerCommand swerveControllerCommand14 = new SwerveControllerCommand(
+        middleNote,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
+        
+
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
+
+        SwerveControllerCommand swerveControllerCommand24 = new SwerveControllerCommand(
+        sideNote,
         m_robotDrive::getPose, // Functional interface to feed supplier
         DriveConstants.kDriveKinematics,
         
@@ -557,17 +679,57 @@ thetaController.enableContinuousInput(-Math.PI, Math.PI);
         m_robotDrive);
 
 
+Command highSpeaker = new RunCommand(
+() -> m_shooter.shooterTrap(), 
+m_shooter).withTimeout(.5);
+
+Command shooterStop = new RunCommand(
+() -> m_shooter.shooterStop(), 
+m_shooter).withTimeout(1.1);
+
+Command launch = new RunCommand(
+() -> m_intake.intakeRun(), 
+m_intake).withTimeout(.5);
+
+Command suck = new RunCommand(
+() -> m_intake.intakeRun(), 
+m_intake).withTimeout(3);
+
+Command stopSuck = new RunCommand(
+() -> m_intake.intakeStop(), 
+m_intake).withTimeout(1);
+    
+Command lowerArm = new RunCommand(
+() -> m_angleAdjust.angleAdjustAuto(-.4), 
+m_angleAdjust).withTimeout(1.4);
+
+
+Command armStop = new RunCommand(
+() -> m_angleAdjust.angleAdjustAuto(0), 
+m_angleAdjust).withTimeout(1.1);
+
+//ParallelCommandGroup
 
 // Reset odometry to the starting pose of the trajectory.
-m_robotDrive.resetOdometry(RedSlide.getInitialPose());
+m_robotDrive.resetOdometry(straigth2Note.getInitialPose());
 
-
- 
-
-     
-// Run path following command, then stop at the end.
-return swerveControllerCommand5.andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
+return highSpeaker
+.andThen(launch)
+.andThen(lowerArm)
+.andThen(armStop)
+.andThen(swerveControllerCommand4)
+.andThen(swerveControllerCommand14)
+.andThen(swerveControllerCommand24)
+.andThen(() -> m_robotDrive.drive(0, 0, 0, false, false))
+//.andThen(launch)
+;
 }
+//andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));;
+// Run path following command, then stop at the end.
+//return highSpeaker.
+//andThen(launch).andThen(lowerArm).andThen(armStop).andThen(suck).
+//andThen(swerveControllerCommand2).
+//andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
 
 
 //                      Auto 7:
