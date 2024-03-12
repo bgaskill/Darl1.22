@@ -15,6 +15,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
 import frc.utils.SwerveUtils;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -225,13 +226,12 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void changeSpeedHigh () {
-    DriveConstants.kMaxSpeedMetersPerSecond= 3.5;
+    DriveConstants.kMaxSpeedMetersPerSecond= SmartDashboard.getNumber("high speed", 4.8);
   }
 
   public void changeSpeedLow() {
-    DriveConstants.kMaxSpeedMetersPerSecond= 1.5;
+    DriveConstants.kMaxSpeedMetersPerSecond= SmartDashboard.getNumber("low speed", 2.0);
   }
-
   /**
    * Returns the heading of the robot.
    *

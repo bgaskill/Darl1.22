@@ -79,7 +79,11 @@ public class RobotContainer {
     //chooser.addOption("Blue Four", getAutonomousCommand10());
     
     SmartDashboard.putData(chooser);
-    
+   
+    SmartDashboard.putNumber("high speed", 4.8);
+    SmartDashboard.putNumber("low speed", 2.0);
+
+
     
     // Configure the button bindings
     configureButtonBindings();
@@ -177,7 +181,7 @@ new JoystickButton(m_operatorController, 8)
                     //amp shot
 new JoystickButton(m_operatorController, 1)
             .whileTrue(new RunCommand(
-                    () -> m_shooter.shooterAmp(), 
+                    () -> m_shooter.shooterAmpRPM(), 
                     m_shooter));   
 
                    //trap shot
@@ -270,7 +274,7 @@ Trajectory straigth2Note = TrajectoryGenerator.generateTrajectory(
     // Pass through these two interior waypoints, making an 's' curve path
     List.of(new Translation2d(.5, 0), new Translation2d(1, 0)),
     // End 3 meters straight ahead of where we started, facing forward
-    new Pose2d(1.5, 0, new Rotation2d(0)),
+    new Pose2d(2, 0, new Rotation2d(0)),
     config);
 
 
@@ -460,8 +464,8 @@ Command stopSuck = new RunCommand(
 m_intake).withTimeout(1);
     
 Command lowerArm = new RunCommand(
-() -> m_angleAdjust.angleAdjustAuto(-.4), 
-m_angleAdjust).withTimeout(1.3);
+() -> m_angleAdjust.angleAdjustAuto(-.5), 
+m_angleAdjust).withTimeout(1.5);
 
 
 Command armStop = new RunCommand(
