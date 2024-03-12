@@ -69,7 +69,7 @@ public class RobotContainer {
       // chooser stuff
     chooser.addOption("Exit Only", getAutonomousCommand());
     chooser.addOption("Shoot and exit", getAutonomousCommand2());
-    chooser.addOption("Straight to Centerline 45 3m/s", getAutonomousCommand3());
+    chooser.addOption("Straight to Centerline 45 4m/s", getAutonomousCommand3());
     chooser.addOption("Shoot 2", getAutonomousCommand4());
     chooser.addOption("4 shot no aim", getAutonomousCommand5());
     chooser.addOption("4 shot dev", getAutonomousCommand6());
@@ -346,13 +346,13 @@ return highSpeaker
 
 
 
-//                              Auto 3:to centerline 3 m/s and 45 to right
+//                              Auto 3:to centerline 4 m/s and 45 to right
 
 
 public Command getAutonomousCommand3() {
 // Create config for trajectory
 TrajectoryConfig config = new TrajectoryConfig(
-     3,
+     4,
     AutoConstants.kMaxAccelerationMetersPerSecondSquared)
     // Add kinematics to ensure max speed is actually obeyed
     .setKinematics(DriveConstants.kDriveKinematics);
@@ -364,7 +364,7 @@ Trajectory straigthGamePiece2 = TrajectoryGenerator.generateTrajectory(
     // Pass through these two interior waypoints, making an 's' curve path
     List.of(new Translation2d(2, 0), new Translation2d(5, 0)),
     // End 3 meters straight ahead of where we started, facing forward
-    new Pose2d(5.8, 0, new Rotation2d(45)),
+    new Pose2d(7.4, 0, new Rotation2d(0.785)),
     config);
 
 
@@ -486,12 +486,6 @@ return highSpeaker
 //.andThen(launch)
 ;
 }
-//andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));;
-// Run path following command, then stop at the end.
-//return highSpeaker.
-//andThen(launch).andThen(lowerArm).andThen(armStop).andThen(suck).
-//andThen(swerveControllerCommand2).
-//andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
 
 
 
@@ -583,12 +577,7 @@ return highSpeaker
 //.andThen(launch)
 ;
 }
-//andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));;
-// Run path following command, then stop at the end.
-//return highSpeaker.
-//andThen(launch).andThen(lowerArm).andThen(armStop).andThen(suck).
-//andThen(swerveControllerCommand2).
-//andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
+
 
 
 //                      Auto 6:4 shot dev
@@ -728,78 +717,15 @@ return highSpeaker
 //.andThen(launch)
 ;
 }
-//andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));;
-// Run path following command, then stop at the end.
-//return highSpeaker.
-//andThen(launch).andThen(lowerArm).andThen(armStop).andThen(suck).
-//andThen(swerveControllerCommand2).
-//andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
 
 
-//                      Auto 7:
+//                      Auto 7: Red <HomeWrekker>
 
 public Command getAutonomousCommand7() {
+
 // Create config for trajectory
 TrajectoryConfig config = new TrajectoryConfig(
-    1,
-    AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-    // Add kinematics to ensure max speed is actually obeyed
-    .setKinematics(DriveConstants.kDriveKinematics);
-   
-// An example trajectory to follow. All units in meters.
-Trajectory straigthGamePiece = TrajectoryGenerator.generateTrajectory(
-    // Start at the origin facing the +X direction
-    new Pose2d(0, 0, new Rotation2d(0)),
-    // Pass through these two interior waypoints, making an 's' curve path
-    List.of(new Translation2d(1, -.4), new Translation2d(3, -.4)),
-    // End 3 meters straight ahead of where we started, facing forward
-    new Pose2d(4.75, -.1, new Rotation2d(0)),
-    config);
-
-
-var thetaController = new ProfiledPIDController(
-    AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
-thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-
-    SwerveControllerCommand swerveControllerCommand2 = new SwerveControllerCommand(
-        straigthGamePiece,
-        m_robotDrive::getPose, // Functional interface to feed supplier
-        DriveConstants.kDriveKinematics,
-        
-
-        // Position controllers
-        new PIDController(AutoConstants.kPXController, 0, 0),
-        new PIDController(AutoConstants.kPYController, 0, 0),
-        thetaController,
-        m_robotDrive::setModuleStates,
-        m_robotDrive);
-
-
-    
-// Reset odometry to the starting pose of the trajectory.
-m_robotDrive.resetOdometry(straigthGamePiece.getInitialPose());
-
-
- 
-
-     
-// Run path following command, then stop at the end.
-return swerveControllerCommand2
-    //.andThen(m_robotDrive.run(() -> m_robotDrive.drive(0.2, 0, 0, false, false))).withTimeout(5.0)
-    .andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
-}
-
-
-
-//                              Auto 8:
-
-
-//red Outside
-public Command getAutonomousCommand8() {
-// Create config for trajectory
-TrajectoryConfig config = new TrajectoryConfig(
-    1,
+     4,
     AutoConstants.kMaxAccelerationMetersPerSecondSquared)
     // Add kinematics to ensure max speed is actually obeyed
     .setKinematics(DriveConstants.kDriveKinematics);
@@ -808,10 +734,10 @@ TrajectoryConfig config = new TrajectoryConfig(
 Trajectory straigthGamePiece2 = TrajectoryGenerator.generateTrajectory(
     // Start at the origin facing the +X direction
     new Pose2d(0, 0, new Rotation2d(0)),
-    // Pass through these two interior waypoints, making an 's' curve path
-    List.of(new Translation2d(1, .3), new Translation2d(3.3, .3)),
-    // End 3 meters straight ahead of where we started, facing forward
-    new Pose2d(4.75, 0, new Rotation2d(0)),
+ 
+    List.of(new Translation2d(2, .6), new Translation2d(5, 0.6),new Translation2d(7.0, .6)),
+    // End at centerline at 45 degrees
+    new Pose2d(7.0, -5.0, new Rotation2d(0.785)),
     config);
 
 
@@ -820,7 +746,7 @@ var thetaController = new ProfiledPIDController(
 thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
 
-    SwerveControllerCommand swerveControllerCommand3 = new SwerveControllerCommand(
+    SwerveControllerCommand swerveControllerCommand7 = new SwerveControllerCommand(
         straigthGamePiece2,
         m_robotDrive::getPose, // Functional interface to feed supplier
         DriveConstants.kDriveKinematics,
@@ -844,7 +770,66 @@ m_robotDrive.resetOdometry(straigthGamePiece2.getInitialPose());
 
      
 // Run path following command, then stop at the end.
-return swerveControllerCommand3
+return swerveControllerCommand7
+    //.andThen(m_robotDrive.run(() -> m_robotDrive.drive(0.2, 0, 0, false, false))).withTimeout(5.0)
+    .andThen(m_robotDrive.run(() -> m_robotDrive.drive(0, 0, 0, false, false)));
+}
+
+
+
+//                              Auto 8:Blue homewrekker
+
+
+//red Outside
+public Command getAutonomousCommand8() {
+// Create config for trajectory
+TrajectoryConfig config = new TrajectoryConfig(
+     4,
+    AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+    // Add kinematics to ensure max speed is actually obeyed
+    .setKinematics(DriveConstants.kDriveKinematics);
+   
+// An example trajectory to follow. All units in meters.
+Trajectory straigthGamePiece2 = TrajectoryGenerator.generateTrajectory(
+    // Start at the origin facing the +X direction
+    new Pose2d(0, 0, new Rotation2d(0)),
+ 
+    List.of(new Translation2d(2, -0.6), new Translation2d(5, -0.6),new Translation2d(7.0, -0.6)),
+    // End at centerline at 45 degrees
+    new Pose2d(7, 5, new Rotation2d(0.785)),
+    config);
+
+
+var thetaController = new ProfiledPIDController(
+    AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+
+    SwerveControllerCommand swerveControllerCommand8 = new SwerveControllerCommand(
+        straigthGamePiece2,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
+        
+
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
+
+
+
+    
+// Reset odometry to the starting pose of the trajectory.
+m_robotDrive.resetOdometry(straigthGamePiece2.getInitialPose());
+
+
+ 
+
+     
+// Run path following command, then stop at the end.
+return swerveControllerCommand8
     //.andThen(m_robotDrive.run(() -> m_robotDrive.drive(0.2, 0, 0, false, false))).withTimeout(5.0)
     .andThen(m_robotDrive.run(() -> m_robotDrive.drive(0, 0, 0, false, false)));
 }
