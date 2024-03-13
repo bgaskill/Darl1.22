@@ -75,6 +75,7 @@ public class RobotContainer {
     chooser.addOption("4 shot dev", getAutonomousCommand6());
     chooser.addOption("Red HomeWrekker", getAutonomousCommand7());
     chooser.addOption("Blue HomeWrekker", getAutonomousCommand8());
+     chooser.addOption("4 Real", getAutonomousCommand9());
     //chooser.addOption("Red Four", getAutonomousCommand9());
     //chooser.addOption("Blue Four", getAutonomousCommand10());
     
@@ -445,7 +446,7 @@ thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
 Command highSpeaker = new RunCommand(
 () -> m_shooter.shooterTrap(), 
-m_shooter).withTimeout(1.1);
+m_shooter).withTimeout(1.3);
 
 Command shooterStop = new RunCommand(
 () -> m_shooter.shooterStop(), 
@@ -453,7 +454,7 @@ m_shooter).withTimeout(1.1);
 
 Command launch = new RunCommand(
 () -> m_intake.intakeRun(), 
-m_intake).withTimeout(1.1);
+m_intake).withTimeout(1.3);
 
 Command suck = new RunCommand(
 () -> m_intake.intakeRun(), 
@@ -596,12 +597,12 @@ Trajectory straigth2Note = TrajectoryGenerator.generateTrajectory(
     // Start at the origin facing the +X direction
     new Pose2d(0, 0, new Rotation2d(0)),
     // Pass through these two interior waypoints, making an 's' curve path
-    List.of(new Translation2d(.5, 1.0), new Translation2d(1.3, 1.1)
+    List.of(new Translation2d(.5, .9), new Translation2d(1.4, 1.0)
  
     //new Translation2d(1, 2),new Translation2d(1.5, 2)
 ),
     // End 3 meters straight ahead of where we started, facing forward
-    new Pose2d(.5, 0, new Rotation2d(.6)),
+    new Pose2d(.5, 0, new Rotation2d(.5)),
     config);
 
 Trajectory middleNote = TrajectoryGenerator.generateTrajectory(
@@ -613,19 +614,19 @@ Trajectory middleNote = TrajectoryGenerator.generateTrajectory(
     //new Translation2d(1, 2),new Translation2d(1.5, 2)
 ),
     // End 3 meters straight ahead of where we started, facing forward
-    new Pose2d(1.6, 0, new Rotation2d(-.1)),
+    new Pose2d(1.6, 0, new Rotation2d(-.08)),
     config);
 
 Trajectory sideNote = TrajectoryGenerator.generateTrajectory(
     // Start at the origin facing the +X direction
     new Pose2d(0, 0, new Rotation2d(0)),
     // Pass through these two interior waypoints, making an 's' curve path
-    List.of(new Translation2d(.2, -.5), new Translation2d(1.1, -1.2)
+    List.of(new Translation2d(.2, -.5), new Translation2d(1.1, -1.5)
  
     //new Translation2d(1, 2),new Translation2d(1.5, 2)
 ),
     // End 3 meters straight ahead of where we started, facing forward
-    new Pose2d(1.7, -1.4, new Rotation2d(-.4)),
+    new Pose2d(1.7, -1.8, new Rotation2d(-.4)),
     config);
 var thetaController = new ProfiledPIDController(
     AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
@@ -694,7 +695,7 @@ m_intake).withTimeout(1);
     
 Command lowerArm = new RunCommand(
 () -> m_angleAdjust.angleAdjustAuto(-.4), 
-m_angleAdjust).withTimeout(1.4);
+m_angleAdjust).withTimeout(1.65);
 
 
 Command armStop = new RunCommand(
@@ -833,5 +834,91 @@ return swerveControllerCommand8
     //.andThen(m_robotDrive.run(() -> m_robotDrive.drive(0.2, 0, 0, false, false))).withTimeout(5.0)
     .andThen(m_robotDrive.run(() -> m_robotDrive.drive(0, 0, 0, false, false)));
 }
-  }
+
+
+
+
+public Command getAutonomousCommand9() {
+// Create config for trajectory
+TrajectoryConfig config = new TrajectoryConfig(
+     AutoConstants.kMaxSpeedMetersPerSecond,
+    AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+    // Add kinematics to ensure max speed is actually obeyed
+    .setKinematics(DriveConstants.kDriveKinematics);
+   
+// An example trajectory to follow. All units in meters.
+Trajectory straigth2Note = TrajectoryGenerator.generateTrajectory(
+    // Start at the origin facing the +X direction
+    new Pose2d(0, 0, new Rotation2d(0)),
+    // Pass through these two interior waypoints, making an 's' curve path
+    List.of(new Translation2d(.5, 0), new Translation2d(1, 0)),
+    // End 3 meters straight ahead of where we started, facing forward
+    new Pose2d(1.5, 0, new Rotation2d(0)),
+    config);
+
+
+var thetaController = new ProfiledPIDController(
+    AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+
+    SwerveControllerCommand swerveControllerCommand9 = new SwerveControllerCommand(
+        straigth2Note,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
+        
+
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
+
+Command highSpeaker = new RunCommand(
+() -> m_shooter.shooterTrap(), 
+m_shooter).withTimeout(1.3);
+
+Command shooterStop = new RunCommand(
+() -> m_shooter.shooterStop(), 
+m_shooter).withTimeout(1.1);
+
+Command launch = new RunCommand(
+() -> m_intake.intakeRun(), 
+m_intake).withTimeout(1.3);
+
+Command suck = new RunCommand(
+() -> m_intake.intakeRun(), 
+m_intake).withTimeout(3);
+
+Command stopSuck = new RunCommand(
+() -> m_intake.intakeStop(), 
+m_intake).withTimeout(1);
+    
+Command lowerArm = new RunCommand(
+() -> m_angleAdjust.angleAdjustAuto(-.5), 
+m_angleAdjust).withTimeout(1.5);
+
+
+Command armStop = new RunCommand(
+() -> m_angleAdjust.angleAdjustAuto(0), 
+m_angleAdjust).withTimeout(1.1);
+
+//ParallelCommandGroup blast = new ParallelCommandGroup(intakeRun());
+
+// Reset odometry to the starting pose of the trajectory.
+m_robotDrive.resetOdometry(straigth2Note.getInitialPose());
+
+return highSpeaker
+.andThen(launch)
+.andThen(lowerArm)
+.andThen(armStop)
+.andThen(swerveControllerCommand9)
+
+.andThen(() -> m_robotDrive.drive(0, 0, 0, false, false))
+//.andThen(launch)
+;
+}
+
+}
 
