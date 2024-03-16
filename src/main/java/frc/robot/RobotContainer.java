@@ -33,6 +33,7 @@ import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -66,6 +67,7 @@ public class RobotContainer {
    */
   public RobotContainer() {
     
+    
       // chooser stuff
     chooser.addOption("Exit Only", getAutonomousCommand());
     chooser.addOption("Shoot and exit", getAutonomousCommand2());
@@ -81,8 +83,8 @@ public class RobotContainer {
     
     SmartDashboard.putData(chooser);
    
-    SmartDashboard.putNumber("high speed", 4.8);
-    SmartDashboard.putNumber("low speed", 2.0);
+    //SmartDashboard.putNumber("high angular speed", 1.35);
+    //SmartDashboard.putNumber("low angular speed", 0.5);
 
 
     
@@ -491,7 +493,7 @@ return highSpeaker
 
 
 
-//                      Auto 5: 4 note no airm
+//                      Auto 5: 4 note no aim
 
 
 public Command getAutonomousCommand5() {
@@ -736,9 +738,9 @@ Trajectory straigthGamePiece2 = TrajectoryGenerator.generateTrajectory(
     // Start at the origin facing the +X direction
     new Pose2d(0, 0, new Rotation2d(0)),
  
-    List.of(new Translation2d(2, .6), new Translation2d(5, 0.6),new Translation2d(7.0, .6)),
+    List.of(new Translation2d(2, .6), new Translation2d(5, 0.6),new Translation2d(6.8, .6)),
     // End at centerline at 45 degrees
-    new Pose2d(7.0, -5.0, new Rotation2d(0.785)),
+    new Pose2d(7.0, -6.0, new Rotation2d(0.785)),
     config);
 
 
@@ -795,9 +797,9 @@ Trajectory straigthGamePiece2 = TrajectoryGenerator.generateTrajectory(
     // Start at the origin facing the +X direction
     new Pose2d(0, 0, new Rotation2d(0)),
  
-    List.of(new Translation2d(2, -0.6), new Translation2d(5, -0.6),new Translation2d(7.0, -0.6)),
+    List.of(new Translation2d(2, -0.6), new Translation2d(5, -0.6),new Translation2d(6.8, -0.6)),
     // End at centerline at 45 degrees
-    new Pose2d(7, 5, new Rotation2d(0.785)),
+    new Pose2d(7, 6, new Rotation2d(0.785)),
     config);
 
 
@@ -836,34 +838,119 @@ return swerveControllerCommand8
 }
 
 
-
+//                             Auto 9: 4 Real
 
 public Command getAutonomousCommand9() {
 // Create config for trajectory
-TrajectoryConfig config = new TrajectoryConfig(
-     AutoConstants.kMaxSpeedMetersPerSecond,
+TrajectoryConfig config = new TrajectoryConfig(3,
     AutoConstants.kMaxAccelerationMetersPerSecondSquared)
     // Add kinematics to ensure max speed is actually obeyed
     .setKinematics(DriveConstants.kDriveKinematics);
    
 // An example trajectory to follow. All units in meters.
-Trajectory straigth2Note = TrajectoryGenerator.generateTrajectory(
+
+
+// Completed + works
+Trajectory shootTwo = TrajectoryGenerator.generateTrajectory(
     // Start at the origin facing the +X direction
     new Pose2d(0, 0, new Rotation2d(0)),
-    // Pass through these two interior waypoints, making an 's' curve path
+    // shoot note then go backwards
     List.of(new Translation2d(.5, 0), new Translation2d(1, 0)),
-    // End 3 meters straight ahead of where we started, facing forward
+    // End 1.5 meters straight ahead of where we started, facing forward
     new Pose2d(1.5, 0, new Rotation2d(0)),
     config);
 
+
+
+
+// Completed + works
+Trajectory grabNoteLeft = TrajectoryGenerator.generateTrajectory(
+    //Start from previous exit
+    new Pose2d(1.5, 0, new Rotation2d(0)),
+    // go to left note from the new origin
+    List.of(
+     new Translation2d(1, 0.7),
+     new Translation2d(1.2, 1.2),
+     //this is wher the note is
+     new Translation2d(1.3, 1.25)),
+    // end at the note
+    new Pose2d(1.5, 0, new Rotation2d(0.65)),
+    config);
+
+
+    //just makes the robot turn in the middle to re-align itself
+Trajectory rotate1 = TrajectoryGenerator.generateTrajectory(
+    //Start from previous exit
+    new Pose2d(1.5, 0, new Rotation2d(0.65)),
+    // go to left note from the new origin
+    List.of(
+     new Translation2d(1.5, -0.2)),
+    // end at the note
+    new Pose2d(1.5, 0, new Rotation2d(-0.2)),
+    config);
+
+
+
+Trajectory grabNoteRight = TrajectoryGenerator.generateTrajectory(
+    //Start from previous exit
+    new Pose2d(1.5, 0, new Rotation2d(-0.2)),
+    // go to left note from the new origin
+    List.of(
+     new Translation2d(1, -0.7),
+     new Translation2d(1.1, -1.3),
+     //ths is where the note is
+     new Translation2d(1.4, -1.4),
+     new Translation2d(1.3, -1)),
+    // end at the note
+    new Pose2d(1.5, 0, new Rotation2d(-0.7)),
+    config);
 
 var thetaController = new ProfiledPIDController(
     AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
 thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
 
-    SwerveControllerCommand swerveControllerCommand9 = new SwerveControllerCommand(
-        straigth2Note,
+    SwerveControllerCommand swerveControllerCommand90 = new SwerveControllerCommand(
+        shootTwo,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
+        
+
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
+    
+      SwerveControllerCommand swerveControllerCommand91 = new SwerveControllerCommand(
+        grabNoteLeft,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
+        
+
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
+    
+    SwerveControllerCommand swerveControllerCommand92 = new SwerveControllerCommand(
+        rotate1,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
+        
+
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
+
+    SwerveControllerCommand swerveControllerCommand93 = new SwerveControllerCommand(
+        grabNoteRight,
         m_robotDrive::getPose, // Functional interface to feed supplier
         DriveConstants.kDriveKinematics,
         
@@ -881,7 +968,7 @@ m_shooter).withTimeout(1.3);
 
 Command shooterStop = new RunCommand(
 () -> m_shooter.shooterStop(), 
-m_shooter).withTimeout(1.1);
+m_shooter).withTimeout(0.05);
 
 Command launch = new RunCommand(
 () -> m_intake.intakeRun(), 
@@ -893,28 +980,46 @@ m_intake).withTimeout(3);
 
 Command stopSuck = new RunCommand(
 () -> m_intake.intakeStop(), 
-m_intake).withTimeout(1);
+m_intake).withTimeout(0.5);
     
 Command lowerArm = new RunCommand(
 () -> m_angleAdjust.angleAdjustAuto(-.5), 
 m_angleAdjust).withTimeout(1.5);
+
+Command lowerArm2 = new RunCommand(
+() -> m_angleAdjust.angleAdjustAuto(-.05), 
+m_angleAdjust).withTimeout(.05);
 
 
 Command armStop = new RunCommand(
 () -> m_angleAdjust.angleAdjustAuto(0), 
 m_angleAdjust).withTimeout(1.1);
 
+
+
 //ParallelCommandGroup blast = new ParallelCommandGroup(intakeRun());
 
 // Reset odometry to the starting pose of the trajectory.
-m_robotDrive.resetOdometry(straigth2Note.getInitialPose());
+m_robotDrive.resetOdometry(shootTwo.getInitialPose());
 
 return highSpeaker
 .andThen(launch)
 .andThen(lowerArm)
 .andThen(armStop)
-.andThen(swerveControllerCommand9)
+// This command runs the shoot 2 auto
+.andThen(swerveControllerCommand90)
 
+// This command runs the triangle note grab on the left
+.andThen(swerveControllerCommand91)
+
+.andThen(lowerArm2)
+// This command runs the tirangle note grab on the right
+.andThen(swerveControllerCommand92)
+
+
+.andThen(swerveControllerCommand93)
+
+// I have no idea what this does
 .andThen(() -> m_robotDrive.drive(0, 0, 0, false, false))
 //.andThen(launch)
 ;

@@ -125,7 +125,7 @@ public final class Constants {
   public static final class AutoConstants {
     public static final double kMaxSpeedMetersPerSecond = 1;//3
     public static final double kMaxAccelerationMetersPerSecondSquared = 3;//3
-    public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
+    public static final double kMaxAngularSpeedRadiansPerSecond = 1.6 * Math.PI;
     public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
 
     public static final double kPXController = 1;
@@ -170,7 +170,7 @@ public static final class ClimberConstants {
     public static final class IntakeConstants {
 
       public static final int kIntakeID = 41;
-      public static final int kBottomIntakeID = 61;
+      public static final int kBottomIntakeID = 21;
       public static final double intakeSpeed = .8;
   
   }

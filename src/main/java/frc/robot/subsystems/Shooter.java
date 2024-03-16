@@ -13,7 +13,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+//import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix6.controls.*;
 
 
@@ -35,7 +35,7 @@ final VelocityVoltage m_velocity2 = new VelocityVoltage(0);
 
   /** Creates a new Shooter. */
   public Shooter() {}
-
+    
   @Override
   public void periodic() {
 
@@ -52,7 +52,7 @@ final VelocityVoltage m_velocity2 = new VelocityVoltage(0);
     var rotorRPM = talonShooter.getVelocity();
     var rotorRPMLatency =rotorRPM.getTimestamp().getLatency();
     rotorRPM.waitForUpdate(.020);
-    SmartDashboard.putNumber("RPM",rotorRPM.getValue());
+    //SmartDashboard.putNumber("RPM",rotorRPM.getValue());
   }
 public void shooterAmp(){
 
@@ -61,10 +61,10 @@ talonShooter.set(-.8);
 
     //talonShooter.set(-.22);
     //talonShooter2.vel(-.05);
-    var rotorRPM = talonShooter.getVelocity();
-    var rotorRPMLatency =rotorRPM.getTimestamp().getLatency();
-    rotorRPM.waitForUpdate(.020);
-    SmartDashboard.putNumber("RPM",rotorRPM.getValue());
+   // var rotorRPM = talonShooter.getVelocity();
+    //var rotorRPMLatency =rotorRPM.getTimestamp().getLatency();
+    //rotorRPM.waitForUpdate(.020);
+    //SmartDashboard.putNumber("RPM",rotorRPM.getValue());
     
   }
 public void shooterAmpRPM(){
@@ -98,10 +98,10 @@ public void shooterSpeaker(){
 
     talonShooter.set(-.6);
     talonShooter2.set(.6);
-    var rotorRPM = talonShooter.getVelocity();
-    var rotorRPMLatency =rotorRPM.getTimestamp().getLatency();
-    rotorRPM.waitForUpdate(.020);
-    SmartDashboard.putNumber("RPM",rotorRPM.getValue());
+    //var rotorRPM = talonShooter.getVelocity();
+    //var rotorRPMLatency =rotorRPM.getTimestamp().getLatency();
+    //rotorRPM.waitForUpdate(.020);
+    //SmartDashboard.putNumber("RPM",rotorRPM.getValue());
     
   }
 
