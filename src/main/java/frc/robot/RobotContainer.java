@@ -47,7 +47,7 @@ import java.util.List;
  */
 public class RobotContainer {
   // The robot's subsystems
-  private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+  public final DriveSubsystem m_robotDrive = new DriveSubsystem();
 
   private final AngleAdjust m_angleAdjust = new AngleAdjust();
   private final Climber m_climber = new Climber();
