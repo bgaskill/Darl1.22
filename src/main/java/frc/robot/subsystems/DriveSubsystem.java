@@ -228,11 +228,11 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void changeSpeedHigh () {
-    DriveConstants.kMaxSpeedMetersPerSecond= SmartDashboard.getNumber("high speed", 4.8);
+    DriveConstants.kMaxSpeedMetersPerSecond= SmartDashboard.getNumber("high speed", 1);//4.8
   }
 
   public void changeSpeedLow() {
-    DriveConstants.kMaxSpeedMetersPerSecond= SmartDashboard.getNumber("low speed", 2.0);
+    DriveConstants.kMaxSpeedMetersPerSecond= SmartDashboard.getNumber("low speed", 1);//2
   }
   /**
    * Returns the heading of the robot.

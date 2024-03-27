@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -61,6 +62,7 @@ public class RobotContainer {
 //Chooser Set up
   SendableChooser<Command> chooser = new SendableChooser<>();
 
+  
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -73,7 +75,7 @@ public class RobotContainer {
     chooser.addOption("Shoot and exit", getAutonomousCommand2());
     chooser.addOption("Straight to Centerline 45 4m/s", getAutonomousCommand3());
     chooser.addOption("Shoot 2", getAutonomousCommand4());
-    chooser.addOption("4 shot no aim", getAutonomousCommand5());
+    chooser.addOption("red back shoot-n-scoot", getAutonomousCommand5());
     chooser.addOption("4 shot dev", getAutonomousCommand6());
     chooser.addOption("Red HomeWrekker", getAutonomousCommand7());
     chooser.addOption("Blue HomeWrekker", getAutonomousCommand8());
@@ -300,7 +302,7 @@ thetaController.enableContinuousInput(-Math.PI, Math.PI);
         m_robotDrive);
 
 Command highSpeaker = new RunCommand(
-() -> m_shooter.shooterTrap(), 
+() -> m_shooter.shooterSpeaker(), 
 m_shooter).withTimeout(1.1);
 
 Command shooterStop = new RunCommand(
@@ -447,7 +449,7 @@ thetaController.enableContinuousInput(-Math.PI, Math.PI);
         m_robotDrive);
 
 Command highSpeaker = new RunCommand(
-() -> m_shooter.shooterTrap(), 
+() -> m_shooter.shooterSpeaker(), 
 m_shooter).withTimeout(1.3);
 
 Command shooterStop = new RunCommand(
@@ -493,7 +495,7 @@ return highSpeaker
 
 
 
-//                      Auto 5: 4 note no aim
+//                      Auto 5: 4 Red backshot and scoot
 
 
 public Command getAutonomousCommand5() {
@@ -509,13 +511,12 @@ Trajectory straigth2Note = TrajectoryGenerator.generateTrajectory(
     // Start at the origin facing the +X direction
     new Pose2d(0, 0, new Rotation2d(0)),
     // Pass through these two interior waypoints, making an 's' curve path
-    List.of(new Translation2d(.5, 1.2), new Translation2d(1.5, 1.2)
-, new Translation2d(.5, 0),  new Translation2d(1.5, 0)
-, new Translation2d(.5, -1.20),  new Translation2d(1.5, -1.2)
+    List.of(new Translation2d(.8, -1.1), new Translation2d(1, -1.5)
+
     //new Translation2d(1, 2),new Translation2d(1.5, 2)
 ),
     // End 3 meters straight ahead of where we started, facing forward
-    new Pose2d(5.8, -1.2, new Rotation2d(0)),
+    new Pose2d(1, -4, new Rotation2d(-1.3)),
     config);
 
 
@@ -538,7 +539,7 @@ thetaController.enableContinuousInput(-Math.PI, Math.PI);
         m_robotDrive);
 
 Command highSpeaker = new RunCommand(
-() -> m_shooter.shooterTrap(), 
+() -> m_shooter.shooterSpeaker(), 
 m_shooter).withTimeout(.5);
 
 Command shooterStop = new RunCommand(
@@ -573,8 +574,6 @@ m_robotDrive.resetOdometry(straigth2Note.getInitialPose());
 
 return highSpeaker
 .andThen(launch)
-.andThen(lowerArm)
-.andThen(armStop)
 .andThen(swerveControllerCommand4)
 .andThen(() -> m_robotDrive.drive(0, 0, 0, false, false))
 //.andThen(launch)
@@ -738,9 +737,9 @@ Trajectory straigthGamePiece2 = TrajectoryGenerator.generateTrajectory(
     // Start at the origin facing the +X direction
     new Pose2d(0, 0, new Rotation2d(0)),
  
-    List.of(new Translation2d(2, .6), new Translation2d(5, 0.6),new Translation2d(6.8, .6)),
-    // End at centerline at 45 degrees
-    new Pose2d(7.0, -6.0, new Rotation2d(0.785)),
+    List.of(new Translation2d(2, .4), new Translation2d(5, 0.4),new Translation2d(6.8, .4)),
+    // End at centerline at 45 degrees  .6 to .4
+    new Pose2d(7.4, -6.0, new Rotation2d(0.785)),
     config);
 
 
@@ -797,9 +796,9 @@ Trajectory straigthGamePiece2 = TrajectoryGenerator.generateTrajectory(
     // Start at the origin facing the +X direction
     new Pose2d(0, 0, new Rotation2d(0)),
  
-    List.of(new Translation2d(2, -0.6), new Translation2d(5, -0.6),new Translation2d(6.8, -0.6)),
+    List.of(new Translation2d(2, -0.4), new Translation2d(5, -0.4),new Translation2d(6.8, -0.4)),
     // End at centerline at 45 degrees
-    new Pose2d(7, 6, new Rotation2d(0.785)),
+    new Pose2d(7.4, 6, new Rotation2d(0.785)),
     config);
 
 
@@ -963,7 +962,7 @@ thetaController.enableContinuousInput(-Math.PI, Math.PI);
         m_robotDrive);
 
 Command highSpeaker = new RunCommand(
-() -> m_shooter.shooterTrap(), 
+() -> m_shooter.shooterSpeaker(), 
 m_shooter).withTimeout(1.3);
 
 Command shooterStop = new RunCommand(

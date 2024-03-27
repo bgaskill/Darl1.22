@@ -122,8 +122,8 @@ public void shooterSuck(){
 }
 public void shooterTrap(){
 
-    talonShooter.set(-.5);
-    talonShooter2.set(.50);
+    talonShooter.set(-.3);//-.5
+    talonShooter2.set(.3);//.5
 
 
 }
