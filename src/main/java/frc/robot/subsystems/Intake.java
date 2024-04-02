@@ -47,6 +47,8 @@ private final AnalogInput bb = new AnalogInput(1);
   public void periodic() {
     // This method will be called once per scheduler run
          SmartDashboard.putNumber("beam",bb.getVoltage());
+         
+   
 
   }
 
@@ -56,7 +58,7 @@ private final AnalogInput bb = new AnalogInput(1);
 
     talonIntake.set(((speed/m_colorSensorV3.getProximity())*-100));
     intakeBottom.set(((speed/m_colorSensorV3.getProximity())*-100));
-
+    
    
     
     if (m_colorSensorV3.getProximity() > 1500)
@@ -64,7 +66,13 @@ private final AnalogInput bb = new AnalogInput(1);
         ledeez.set(.65);
 
       }
-      else
+      else  if (bb.getVoltage() < .35)
+    {
+      ledeez.set(.73);
+    }
+
+    else
+
       {
         ledeez.set(0);
       }

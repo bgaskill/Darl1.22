@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import java.util.List;
 
@@ -501,7 +502,7 @@ return highSpeaker
 public Command getAutonomousCommand5() {
 // Create config for trajectory
 TrajectoryConfig config = new TrajectoryConfig(
-     1.5,
+     3,
     AutoConstants.kMaxAccelerationMetersPerSecondSquared)
     // Add kinematics to ensure max speed is actually obeyed
     .setKinematics(DriveConstants.kDriveKinematics);
@@ -511,12 +512,12 @@ Trajectory straigth2Note = TrajectoryGenerator.generateTrajectory(
     // Start at the origin facing the +X direction
     new Pose2d(0, 0, new Rotation2d(0)),
     // Pass through these two interior waypoints, making an 's' curve path
-    List.of(new Translation2d(.8, -1.1), new Translation2d(1, -1.5)
+    List.of(new Translation2d(.7, -1.1), new Translation2d(1.3, -2)
 
     //new Translation2d(1, 2),new Translation2d(1.5, 2)
 ),
     // End 3 meters straight ahead of where we started, facing forward
-    new Pose2d(1, -4, new Rotation2d(-1.3)),
+    new Pose2d(2.3, -6.6, new Rotation2d(-1.2)),
     config);
 
 
@@ -540,7 +541,7 @@ thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
 Command highSpeaker = new RunCommand(
 () -> m_shooter.shooterSpeaker(), 
-m_shooter).withTimeout(.5);
+m_shooter).withTimeout(.4);
 
 Command shooterStop = new RunCommand(
 () -> m_shooter.shooterStop(), 
@@ -552,7 +553,7 @@ m_intake).withTimeout(.5);
 
 Command suck = new RunCommand(
 () -> m_intake.intakeRun(), 
-m_intake).withTimeout(3);
+m_intake).withTimeout(.1);
 
 Command stopSuck = new RunCommand(
 () -> m_intake.intakeStop(), 
@@ -574,6 +575,8 @@ m_robotDrive.resetOdometry(straigth2Note.getInitialPose());
 
 return highSpeaker
 .andThen(launch)
+.andThen(shooterStop)
+.andThen(suck)
 .andThen(swerveControllerCommand4)
 .andThen(() -> m_robotDrive.drive(0, 0, 0, false, false))
 //.andThen(launch)
@@ -868,12 +871,12 @@ Trajectory grabNoteLeft = TrajectoryGenerator.generateTrajectory(
     new Pose2d(1.5, 0, new Rotation2d(0)),
     // go to left note from the new origin
     List.of(
-     new Translation2d(1, 0.7),
-     new Translation2d(1.2, 1.2),
+     new Translation2d(.5, 0.7),//1 orig
+     new Translation2d(.7, 1),//1.2, 1.2
      //this is wher the note is
-     new Translation2d(1.3, 1.25)),
+     new Translation2d(1.5, 1.2)),//1.5,1.25
     // end at the note
-    new Pose2d(1.5, 0, new Rotation2d(0.65)),
+    new Pose2d(1.5, 0, new Rotation2d(0.65)),//1.5 0
     config);
 
 
@@ -896,12 +899,12 @@ Trajectory grabNoteRight = TrajectoryGenerator.generateTrajectory(
     // go to left note from the new origin
     List.of(
      new Translation2d(1, -0.7),
-     new Translation2d(1.1, -1.3),
+     new Translation2d(1.3, -1.3),
      //ths is where the note is
-     new Translation2d(1.4, -1.4),
+     new Translation2d(1.6, -1.4),
      new Translation2d(1.3, -1)),
     // end at the note
-    new Pose2d(1.5, 0, new Rotation2d(-0.7)),
+    new Pose2d(1.5, 0, new Rotation2d(-0.5)),
     config);
 
 var thetaController = new ProfiledPIDController(
@@ -967,7 +970,7 @@ m_shooter).withTimeout(1.3);
 
 Command shooterStop = new RunCommand(
 () -> m_shooter.shooterStop(), 
-m_shooter).withTimeout(0.05);
+m_shooter);
 
 Command launch = new RunCommand(
 () -> m_intake.intakeRun(), 
@@ -979,22 +982,17 @@ m_intake).withTimeout(3);
 
 Command stopSuck = new RunCommand(
 () -> m_intake.intakeStop(), 
-m_intake).withTimeout(0.5);
+m_intake);
     
 Command lowerArm = new RunCommand(
 () -> m_angleAdjust.angleAdjustAuto(-.5), 
 m_angleAdjust).withTimeout(1.5);
 
-Command lowerArm2 = new RunCommand(
-() -> m_angleAdjust.angleAdjustAuto(-.05), 
-m_angleAdjust).withTimeout(.05);
-
-
 Command armStop = new RunCommand(
 () -> m_angleAdjust.angleAdjustAuto(0), 
 m_angleAdjust).withTimeout(1.1);
 
-
+Command stopTime = new WaitCommand(2);
 
 //ParallelCommandGroup blast = new ParallelCommandGroup(intakeRun());
 
@@ -1011,8 +1009,7 @@ return highSpeaker
 // This command runs the triangle note grab on the left
 .andThen(swerveControllerCommand91)
 
-.andThen(lowerArm2)
-// This command runs the tirangle note grab on the right
+// This command runs the triangle note grab on the right
 .andThen(swerveControllerCommand92)
 
 
